@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kundensuche</title>
+    <link rel="stylesheet" href="./style.css">
+    <script src="javascript.js"></script>
+    <script src="makelinks.js"></script>
+  </head>
+  <body>
+    <header>Kunden suchen</header>
+    <div>
+      <aside><nav><ul></ul></nav></aside>
+      <main>
+      <article>
+        <input type="button" class="btn bch" onClick='search("A")' value="A" />
+        <input type="button" class="btn bch" onClick='search("B")' value="B" />
+        <input type="button" class="btn bch" onClick='search("C")' value="C" />
+        <input type="button" class="btn bch" onClick='search("D")' value="D" />
+        <input type="button" class="btn bch" onClick='search("E")' value="E" />
+        <input type="button" class="btn bch" onClick='search("F")' value="F" />
+        <input type="button" class="btn bch" onClick='search("G")' value="G" />
+        <input type="button" class="btn bch" onClick='search("H")' value="H" />
+        <input type="button" class="btn bch" onClick='search("I")' value="I" />
+        <input type="button" class="btn bch" onClick='search("J")' value="J" />
+        <input type="button" class="btn bch" onClick='search("K")' value="K" />
+        <input type="button" class="btn bch" onClick='search("L")' value="L" />
+        <input type="button" class="btn bch" onClick='search("M")' value="M" />
+        <input type="button" class="btn bch" onClick='search("N")' value="N" />
+        <input type="button" class="btn bch" onClick='search("O")' value="O" />
+        <input type="button" class="btn bch" onClick='search("P")' value="P" />
+        <input type="button" class="btn bch" onClick='search("Q")' value="Q" />
+        <input type="button" class="btn bch" onClick='search("R")' value="R" />
+        <input type="button" class="btn bch" onClick='search("S")' value="S" />
+        <input type="button" class="btn bch" onClick='search("T")' value="T" />
+        <input type="button" class="btn bch" onClick='search("U")' value="U" />
+        <input type="button" class="btn bch" onClick='search("V")' value="V" />
+        <input type="button" class="btn bch" onClick='search("W")' value="W" />
+        <input type="button" class="btn bch" onClick='search("X")' value="X" />
+        <input type="button" class="btn bch" onClick='search("Y")' value="Y" />
+        <input type="button" class="btn bch" onClick='search("Z")' value="Z" />
+        <input type="button" class="btn bch" onClick='search("rest")' value=".." />
+        <input type="button" class="btn bch" onClick='search("ID")' value="ID" title="Alle berechtigten Kunden anzeigen"/>
+        <br>
+        <br>
+        <fieldset id="fs1" class="fs"></fieldset>
+      </article>
+      </main>
+    </div>
+    <script>
+
+      // Die anzuzeigenden Links laden
+      function search(name) {
+        fetchCall("GET", "SvcSearch", {type:name}, function(links) {
+          searchCallback(links); });
+        var session = sessionGet();
+        session.searchCrit = name;
+        sessionSave(session);
+      }
+
+      // Die geladenen Informationen aufbereiten und anzeigen
+      function searchCallback(links) {
+        var legend;
+        switch (sessionGet().searchCrit) {
+          case "ID":
+            legend = " gelesene IDs";
+            break;
+          default:
+            legend = links.length == 1 ? " gefundener Name:" : " gefundene Namen:";
+        }
+        var fs = document.querySelector("#fs1");
+        createLinks(fs, links.length + legend, links, showKunde);
+        fs.hidden = false;
+      }
+
+      window.onload = function() {
+        if (sessionBase('SR') == null) return;
+
+        makeNavigation(true);
+        var session = sessionGet();
+        if (session.searchCrit != '')
+          search(session.searchCrit);
+        else
+          document.querySelector("#fs1").hidden = true;
+      }
+    </script>
+  </body>
+</html>

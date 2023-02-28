@@ -1,0 +1,32 @@
+.d1 {width: 88mm; height: 58mm;
+     page-break-inside: avoid; float:left;}
+.d2 {position: relative; top: 19mm; left: -16mm; transform: rotate(270deg);
+     -webkit-transform: rotate(270deg);width: 54mm; height: 18mm;}
+.d11 {position: relative; top: -16mm; left: 24mm; width: 62mm;}
+.d3 {position: relative; z-index: 10;}
+.d31 {float: left;}
+.d4 {position: relative; right: 2mm; float: right;}
+div {display: block; line-height: 95%;}
+img {position: relative; max-height: 15mm; max-width: 51mm;}
+.fontm {font-size: 14pt;}
+.fontl {font-size: 17pt;font-weight: bold;}
+.fonts {font-size: 10pt;}
+svg {position: relative; z-index: -10;}
+@media print {
+  article, header {
+    display: none;
+  }
+  #line {
+    display: block;
+  }
+}
+@media screen {
+  #line {
+    display: none;
+  }
+}
+
+@page {
+  size: 210mm 297mm;
+  margin: 15mm 10mm 10mm 15mm;
+}

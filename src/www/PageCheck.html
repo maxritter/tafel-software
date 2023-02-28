@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0">
+    <title>Kundensuche</title>
+    <link rel="stylesheet" href="./style.css">
+    <script src="javascript.js"></script>
+    <script src="makelinks.js"></script>
+  </head>
+  <body>
+    <header>Prüfungen einstellen</header>
+    <div>
+      <aside><nav><ul></ul></nav></aside>
+      <main>
+      <article>
+        <div id="divsel" style="display:inline-block;"></div>
+        <br>
+        <br>
+        <fieldset id="fs1" class="fs"></fieldset>
+      </article>
+      </main>
+    </div>
+    <script>
+      // Die konfigurierten Prüfungen und zugehörigen Kundennamen laden
+      window.onload = function() {
+        if (sessionBase('CH') == null) return;
+        makeNavigation(true);
+        fetchCall("GET", "SvcCheck", { links: true }, function (obj) {
+          makeSelects(obj.selects);
+          createLinks(document.querySelector("#fs1"), obj.links.length + ' berechtigte Kunden:', obj.links, showKunde);
+        });
+      }
+ 
+      var scanId = "";
+      var scanTime = 0;
+      window.addEventListener("keypress", function(event) {
+        var ti = (new Date()).getTime();
+        if (ti - scanTime > 100) {
+          scanId = "";
+        }
+        if ("0123456789".indexOf(event.key) >= 0) {
+          scanId += event.key;
+          scanTime = ti;
+          event.preventDefault();
+          return;
+        }
+        if (event.key == "Enter") {
+          if (scanId == "") return;
+          event.preventDefault();
+          ladeKunde(scanId);
+          scanId = "";
+          return;
+        }
+      });
+
+      function ladeKunde(id) {
+        fetchCall("GET", "SvcKunde", { id: id, aktiv: true }, function (obj) {
+          if (obj.bean != undefined) {
+            // Kunden anzeigen
+            var session = sessionGet();
+            session.currentID = obj;
+            sessionGoto("DS", session);
+          } else {
+            // ID existiert nicht, Fehler ausgeben
+            beanId = undefined;
+            alert("Der Kunde mit der ID=" + obj.message + " wurde nicht gefunden");
+          }
+        });
+      }
+
+
+      // Erzeugen der HTML Selects
+      function makeSelects(objs) {
+        var divs = document.querySelector('#divsel');
+        if (objs == undefined) {
+          divs.innerHTML="&nbsp;";
+          return;
+        }
+        divs.innerHTML="";
+        for (var i=0; i < objs.length; i++) {
+          var obj = objs[i];
+          var labelstring = obj.label+": ";
+          if (i > 0) labelstring = " "+labelstring;
+          divs.appendChild(document.createTextNode(labelstring));
+          var sel = createSelect(obj.id, obj.options, obj.selected);
+          sel.addEventListener('change', postselchange);
+          divs.appendChild(sel);
+        }
+      }
+
+      // This function is the selection changed WebService call
+      function postselchange() {
+        fetchCall("POST", "SvcCheck", [this.id, this.value], function(obj) {
+          createLinks(document.querySelector("#fs1"), obj.length + ' berechtigete Kunden:', obj, showKunde);
+        });
+      }
+
+    </script>
+  </body>
+</html>

@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kunde Details</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="javascript.js"></script>
+  </head>
+  <body>
+    <header id="res-hdr"></header>
+    <article>
+      <table id="res-tb1"></table>
+      <br>
+      <table id="res-tb2" ></table>
+      <p id="res-msg" style='color:red'></p>
+      <fieldset>
+        <input type='button' id="edit" onClick='edit();' class='blong' value="Kunden ändern" />
+        <input type='button' id="del" onClick='confirm(this);' class='blong' value="Ausweis löschen" />
+        <br>
+        <input type='button' id='end' class='blong' value="Zurück" />
+        <input type='button' id="prol" onClick='showDateInput();' class='blong' value="Ausweis verlängern" />
+        <input type='button' id='save' class='blong' value="Besuch vermerken" />
+      </fieldset>
+    </article>
+
+    <script>
+      var session;
+
+      function confirm(element) {
+        var txt = session.currentID.aktiv ? "Wollen Sie den Kunden wirklich löschen?"
+                                : "Wollen Sie den inaktiven Kunden endgültig löschen?";
+        openYesNo(txt, element, function() {
+              fetchCall("POST", "SvcKunde", {type: "delete", id: session.currentID.id}, goback);
+             });
+      }
+
+      function visit() {
+        fetchCall("POST", "SvcKunde", {type: "visit", id: session.currentID.id}, goback);
+      }
+
+      function goback() {
+        sessionBack();
+      }
+
+      function edit() {
+        sessionGoto("DC");
+      }
+
+      function createPageResult(obj) {
+        document.getElementById("res-tb1").innerHTML="";
+        document.getElementById("res-tb2").innerHTML="";
+
+        var bean = obj.bean;
+        var labels = obj.labels;
+
+        var element = document.getElementById("res-msg");
+        if (obj.message != undefined) {
+          element.innerHTML = obj.message;
+         } else {
+           element.innerHTML = "";
+         }
+        document.getElementById('save').disabled=obj.visited;
+
+        element = document.querySelector("#res-hdr");
+        if (element != undefined) {
+          element.innerHTML = bean[1].replace('&', '&amp;').replace('>', '&gt;').replace('<', '&lt;');
+        }
+        for (var i = 0; i < 7; i++) {
+          var cell = addrow("res-tb1", labels[i], bean[i]);
+        }
+        var cell = addrow("res-tb1", labels[7], dateToPrint(bean[7]));
+        if (obj.dateInvalid == true) {
+          cell.style.color = "white";
+          cell.style.background = "red";
+        }
+        if (obj.dateWarn == true) {
+          cell.style.background = "yellow";
+        }
+        addrow("res-tb1", labels[8], dateToPrint(bean[8]));
+
+        for (var i = 9; i < bean.length; i++) {
+          addrow("res-tb2", labels[i], bean[i]);
+        }
+      }
+
+      /*
+       * Funktionen zum Einblenden einer Datumseingabe und
+       * zum Speichern des Datums (Verlänger einer Berechtigung)
+       */
+      function showDateInput() {
+        document.querySelector("fieldset").disabled = true;
+        var cell = document.querySelector("#res-tb1").rows[7].cells[1];
+        cell.innerHTML = "<input type='date' id='newDate' >" +
+            "<input type='submit' value='Speichern'>" +
+            "<input type='submit' value='Abbruch'>";
+        cell.childNodes[1].addEventListener("click", saveDateSave);
+        cell.childNodes[2].addEventListener("click", saveDateAbort);
+      }
+
+      function saveDateSave() {
+        var id = document.querySelector("#res-tb1").rows[0].cells[1].innerHTML;
+        var date = Date.parse(document.querySelector("#newDate").value);
+        if (isNaN(date)) {
+          alert("Geben Sie ein gültiges Datum ein!");
+          return;
+        }
+        fetchCall("POST", "SvcProlong", { id: id, date: date }, createPageResult);
+        document.querySelector("fieldset").disabled = false;
+      }
+
+      function saveDateAbort() {
+        var id = document.querySelector("#res-tb1").rows[0].cells[1].innerHTML;
+        fetchCall("GET", "SvcKunde", { id: id }, createPageResult);
+        document.querySelector("fieldset").disabled = false;
+      }
+
+      function getbean() {
+        session = sessionVerify('DS');
+        var obj = session.currentID;
+        if (obj.bean != undefined) {
+          createPageResult(obj);
+          session.currentID = { id: obj.bean[0], aktiv: true};
+          sessionSave(session);
+        } else {
+          fetchCall("GET", "SvcKunde", session.currentID, function(obj) {
+           if (obj.bean == undefined)
+             showerror("Die ID " + obj.message + " ist nicht definiert!");
+           else {
+             createPageResult(obj);
+             ["save", "prol"].forEach( function(id) {
+               document.querySelector("#" + id).hidden = !session.currentID.aktiv;
+             });
+           }
+          });
+        }
+      }
+      document.querySelector("#end").addEventListener("click", goback);
+      document.querySelector("#save").addEventListener("click", visit);
+      document.onLoad = getbean();
+    </script>
+  </body>
+</html>
+ 
+

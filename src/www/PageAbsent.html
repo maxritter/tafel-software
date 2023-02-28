@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kundensuche</title>
+    <link rel="stylesheet" href="./style.css">
+    <script src="javascript.js"></script>
+    <script src="makelinks.js"></script>
+  </head>
+  <body>
+    <header>Länger abwesend</header>
+    <div>
+      <aside><nav><ul></ul></nav></aside>
+      <main>
+      <article>
+          <div id="divsel" style="display:inline-block;">
+              Kein Besuch seit:
+              <select onChange="selChanged(this)">
+                <option value="2" >2 Wochen</option>
+                <option value="3" >3 Wochen</option>
+                <option value="4" selected>4 Wochen</option>
+                <option value="5" >5 Wochen</option>
+                <option value="6" >6 Wochen</option>
+                <option value="7" >7 Wochen</option>
+                <option value="8" >8 Wochen</option>
+                <option value="9" >9 Wochen</option>
+                <option value="10" >10 Wochen</option>
+                <option value="11" >11 Wochen</option>
+                <option value="12" >12 Wochen</option>
+              </select>
+            </div>
+            <br>
+            <br>
+            <fieldset id="fs1" class="lfs fs fieldset"></fieldset>
+      </article>
+      </main>
+    </div>
+    <script>
+      // Die anzuzeigenden Links laden
+      window.onload = function() {
+        var session = sessionBase('AB');
+        if (session == null) return;
+
+        makeNavigation(true);
+        if (session.weeks == '') {
+          session.weeks = '2';
+          sessionSave(session);
+        }
+        document.querySelector('select').selectedIndex = session.weeks;
+        loadLinks();
+      }
+
+      function selChanged(sel) {
+        var session = sessionGet();
+        session.weeks = '' + sel.selectedIndex;
+        sessionSave(session);
+        loadLinks()
+      }
+
+      // Die anzuzeigenden Links laden
+      function loadLinks() {
+        var weeks = document.querySelector('select').value;
+        fetchCall("GET", "SvcSearch", {type: "Absent", weeks: weeks}, function(links) {
+          // Die geladenen Informationen aufbereiten und anzeigen
+          var fs = document.querySelector("#fs1");
+          createLinks(fs, "Kunden, die " + weeks + " Wochen nicht in der Tafel waren:", links, showKunde);
+        });
+      }
+
+    </script>
+  </body>
+</html>

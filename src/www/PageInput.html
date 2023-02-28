@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kunde Änderung und Neuanlage</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="javascript.js"></script>
+  </head>
+  <body>
+    <header></header>
+    <article>
+      <table id="res-tb1"></table>
+      <br>
+      <table id="res-tb2" ></table>
+      <p id="res-msg" style='color:red'></p>
+      <fieldset>
+        <input type='button' onClick='sessionBack()' class='blong' value="Abbruch" />
+        <input type='button' onClick='sendData()' class='blong' value="Speichern" />
+      </fieldset>
+    </article>
+
+    <script>
+      var selects, sortieren, kunde, session;
+
+      // Neukunde oder Kunde ändern
+      // Prüfungen laden für Drop-Down Auswahlen
+      function getChecks() {
+        session = sessionGet();
+        if (session.currentID.id == undefined) {
+          sessionVerify("DI");
+          document.querySelector('header').innerHTML = "Erfassen Neukunde";
+        } else {
+          sessionVerify('DC');
+          document.querySelector('header').innerHTML = "Kunde ändern";
+        }
+        fetchCall("GET", "SvcCheck", {werte: true}, function(obj) {
+          selects = obj.selects;
+          sortieren = obj.sortieren;
+          ladeKunde();
+        });
+      }
+
+      // Den Kunden laden bzw. Muster für den Neukunden
+      function ladeKunde() {
+        fetchCall("GET", "SvcKunde", session.currentID, function(obj) {
+          if (obj.bean == undefined)
+            showmessage("Die ID " + obj.message + " ist nicht definiert!");
+          else {
+            kunde = obj;
+            createPageInput();
+          }
+        });
+      }
+
+      // Erzeugt die Eingabefelder
+      function createPageInput() {
+        var bean = kunde.bean;
+        var labels = kunde.labels;
+        
+        var inp = addInput(addrow("res-tb1", labels[0]), 'number', bean[0], "inp-txt");
+        inp.placeholder = "geben Sie eine eindeutige ID ein";
+        inp.focus();
+        if (kunde.abUndFarbe != undefined) inp.select();
+        inputNameAdr(labels[1], labels[2], bean[1], bean[2]);
+        addInput(addrow("res-tb1", labels[3]), 'number', bean[3]);
+        addInput(addrow("res-tb1", labels[4]), 'number', bean[4]);
+        inp = createInputOrSelect("res-tb1", 5, labels, bean);
+        if (kunde.abUndFarbe != undefined) {
+          var span = document.createElement("span");
+          span.innerHTML = " ";
+          inp.parentNode.appendChild(span);
+          inp.parentNode.appendChild(
+              makePopup('Verteilung der Farben ein-/ausblenden', kunde.abUndFarbe)
+            );
+        }
+        createInputOrSelect("res-tb1", 6, labels, bean);
+        addInput(addrow("res-tb1", labels[7]), 'date', bean[7]);
+        addInput(addrow("res-tb1", labels[8]), 'date', bean[8]);
+        session = sessionGet();
+        if (session.currentID.id == undefined) {
+          document.querySelector("#res-tb1").rows[8].style.display = "none";
+        }
+
+        for (var i = 9; i < bean.length; i++) {
+          createInputOrSelect("res-tb2", i, labels, bean);
+        }
+      }
+
+      // Name als 2 Felder, Adresse als 3 Felder
+      function inputNameAdr(lblName, lblAdr, name, adr) {
+        var row, inp, value;
+        value = split(name);
+        row = addrow("res-tb1", lblName);
+        inp = addInput(row, 'text', value[0], "inp-txt-hl");
+        inp.placeholder = "Nachname";
+        inp = addInput(row, 'text', value[1], "inp-txt-hr");
+        inp.placeholder = "Vorname";
+
+        value = split(adr);
+        row = addrow("res-tb1", lblAdr);
+        inp = addInput(row, 'text', value[0], "inp-txt-hl");
+        inp.placeholder = "Straße Hausnummer";
+        if (value[1].search(/[0-9]{5}/) == 0) {
+          value[0] = value[1].substring(0, 5);
+          value[1] = value[1].substring(5).trim();
+        } else value[0] = "";
+        inp = addInput(row, 'text', value[0], "inp-txt-plz");
+        inp.placeholder = "PLZ";
+        inp = addInput(row, 'text', value[1], "inp-txt-ort");
+        inp.placeholder = "Ort";
+      }
+
+      // Den Wert am Komma teilen und ein Array mit 2 Werten zurückgeben
+      function split(s) {
+        if (typeof s != 'string') return ["", ""];
+        var ix = s.indexOf(',');
+        if (ix >= 0)
+          return [s.substring(0, ix).trim(), s.substring(ix + 1).trim()];
+        return [s, ""];
+      }
+
+      // Übernehmen von Name und Adresse
+      function saveNameAdr(values) {
+        var rows = document.getElementById("res-tb1").rows;
+        var ips = rows[1].cells[1].childNodes;
+        var value;
+        value = ips[1].value.trim();
+        if (value.length > 0) value = ", " + value;
+        values.push(ips[0].value.trim() + value); // Name
+
+        ips = rows[2].cells[1].childNodes;
+        value = ips[0].value.trim();
+        var value2 = (ips[1].value.trim() + " " + ips[2].value.trim()).trim();
+        if (value2.length > 0 ) value += ", ";
+        values.push(value + value2); // Adresse
+      }
+
+      // Erzeugt ein Popup mit Button zum Öffnen
+      function makePopup(textInput, elPopup) {
+        var input = document.createElement("input");
+        input.type = 'submit';
+        input.value = textInput;
+
+        var span = document.createElement("span");
+        span.classList.add('popuptext');
+        var table = document.createElement("table");
+        span.appendChild(table);
+        table.classList.add('popuptable');
+        Object.keys(elPopup).sort(function(a, b) {return a.localeCompare(b); }).forEach( function(item) {
+          var row = table.insertRow(-1);
+          var cell1 = row.insertCell(0);
+          cell1.innerHTML = item;
+          var cell2 = row.insertCell(1);
+          cell2.innerHTML = elPopup[item];
+        });
+        var div = document.createElement("div");
+        div.classList.add("popup");
+        div.appendChild(input);
+        div.appendChild(span);
+
+        input.addEventListener("click", function() {
+            span.classList.toggle("show");
+          });
+        return div;
+      }
+
+      // Erzeugt entweder einen HTML Input oder ein HTML Select
+      function createInputOrSelect(tableid, i, labels, bean) {
+        var cell = addrow(tableid, labels[i]);
+        var sel = getSelect(labels[i]);
+        if (sel != undefined) {
+          var index = sel.options.indexOf(bean[i]);
+          if (index < 0) index = sel.selected;
+          var sel = createSelect(sel.id, sel.options, index);
+          cell.appendChild(sel);
+          return sel;
+        }
+        return addInput(cell, 'text', bean[i], "inp-txt");
+      }
+
+      /*
+       * Liefert das zum Label definierte Select
+       * Wenn das Label mit einem der Selects beginnt, dann gilt das Select
+       */
+      function getSelect(label) {
+        for (var k = 0; k < selects.length; k++) {
+          if (label.indexOf(selects[k].label) == 0) return selects[k];
+        }
+        return undefined;
+      }
+
+      // Daten aus den Eingabefeldern auslesen und abspeichern
+      function sendData() {
+        var values = [];
+        var rows = document.getElementById("res-tb1").rows;
+        values.push(rows[0].cells[1].childNodes[0].value); // ID
+        saveNameAdr(values);
+        values.push(rows[3].cells[1].childNodes[0].value);        // Erwachsene
+        values.push(rows[4].cells[1].childNodes[0].value);        // Kinder
+        values.push(rows[5].cells[1].childNodes[0].value);        // A/B
+        values.push(rows[6].cells[1].childNodes[0].value);        // Farbe
+        values.push(rows[7].cells[1].childNodes[0].value);        // Gültig bis
+        values.push(rows[8].cells[1].childNodes[0].value);        // Letzter Besuch
+
+        // Für die ersten Felder muss ein Wert eigegeben werden
+        for (var i = 0; i < 7; i++) {
+          if (values[i] == '') {
+            rows[i].cells[1].childNodes[0].focus();
+            document.getElementById("res-msg").innerHTML="Geben Sie bitte einen Wert ein!";
+            return;
+          }
+        }
+        // Feld 5 (Gültig bis) muss ein gültiges Datum sein
+        var date = Date.parse(values[7]);
+        if (isNaN(date)) {
+          alert("Geben Sie ein gültiges Datum ein!");
+          rows[7].cells[1].childNodes[0].focus();
+          return;
+        }
+
+        // Die Werte aus der zweiten Tabelle werden übernommen
+        rows = document.getElementById("res-tb2").rows;
+        for (var i = 0; i < rows.length; i++) {
+          var subv = [];
+          var label = rows[i].cells[0].innerHTML;
+          sortieren.forEach( function(item) {
+            for (;i < rows.length && rows[i].cells[0].innerHTML.indexOf(item) == 0; i++) {
+              subv.push(rows[i].cells[1].childNodes[0].value);
+            }
+            if (subv.length > 0) {
+              values = values.concat(subv.sort(function(a,b) {
+                if (a == "") return 1;
+                if (b == "") return -1;
+                return a.localeCompare(b)
+              }));
+              subv = [];
+            };
+          });
+          if (i < rows.length) {
+            values.push(rows[i].cells[1].childNodes[0].value);
+          };
+        }
+        var p = {type: 'change', oldid: session.currentID.id, bean: values};
+
+        document.querySelector("fieldset").disabled = true;
+        fetchCall("POST", "SvcKunde", p, function(obj) {
+          var element = document.getElementById("res-msg");
+          element.innerHTML="";
+          if (obj != '') {
+            element.innerHTML = obj.message;
+            document.querySelector("fieldset").disabled = false;
+          } else {
+            session.currentID.id = values[0];
+            session.currentID.aktiv = true;
+            sessionBack(session, "SC", "DS");
+          }
+        });
+      }
+
+      function addLabel(cell, value) {
+        if (value != undefined) cell.innerHTML = value;
+      }
+
+      function addInput(cell, type, value, css) {
+        var input = document.createElement("input");
+        cell.appendChild(input);
+        if (input.type) input.type = type;
+        if (css != undefined) input.classList.add(css);
+        if (value != undefined) input.value = value;
+        return input;
+      }
+
+      window.onload = getChecks;
+    </script>
+  </body>
+</html>
+ 

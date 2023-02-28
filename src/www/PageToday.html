@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kundensuche</title>
+    <link rel="stylesheet" href="./style.css">
+    <script src="javascript.js"></script>
+    <script src="makelinks.js"></script>
+  </head>
+  <body>
+    <header>Kunden heute</header>
+    <div>
+      <aside><nav><ul></ul></nav></aside>
+      <main>
+        <article>
+          <fieldset id="fs1" class="lfs fs fieldset"></fieldset>
+          <div>
+            <br>
+            <p id="message" style="display:initial;"></p>
+            <br>
+          </div>
+        </article>
+      </main>
+    </div>
+    <script>
+      // Die anzuzeigenden Links laden
+      window.onload = function() {
+        if (sessionBase('TD') == null) return;
+
+        makeNavigation(true);
+        fetchCall("GET", "SvcSearch", {type: "scanned"}, function(links) {
+          searchCallback(links);
+        });
+      }
+
+      // Die geladenen Informationen aufbereiten und anzeigen
+      function searchCallback(links) {
+        fetchCall("GET", "SvcStatistik", {} , function(obj) {
+          var html = '';
+          if (links.length == 0) html += "Statistik von " + obj.datum + "<br>";
+          html += obj.berechtigte + " Berechtigte (" + obj.erwachsene +
+                        " Erwachsene und " + obj.kinder + " Kinder) <br>" + 
+                      obj.besucher + " Besucher (" +
+                      obj.besucherE + " Erwachsene und " +
+                      obj.besucherK + " Kinder)";
+          document.querySelector("#message").innerHTML = html;
+        });
+
+        var fs = document.querySelector("#fs1");
+        createLinks(fs, "Bisher " + links.length + " Kunden:", links, showKunde);
+        fs.hidden = false;
+      }
+
+    </script>
+  </body>
+</html>

@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0">
+    <title>Kundensuche</title>
+    <link rel="stylesheet" href="./style.css">
+    <script src="javascript.js"></script>
+  </head>
+  <style>
+    div p {font-size: larger}
+  </style>
+  <body>
+    <header>Ausweise scannen</header>
+    <div>
+      <aside><nav><ul></ul></nav></aside>
+      <main>
+      <article>
+        <div style="border:1px solid;width:150px;height:20px;">
+          ID:&nbsp;<span id='ip' style="width:200px;"></span>
+        </div>
+        <br>
+        <div id="message">
+          <p>Bevor Sie mit dem Scannen starten stellen Sie ein, welche Kunden
+            im Moment erwartet werden. Klicken Sie dazu links auf <b>Prüfungen</b>.</p>
+          <p>Benutzen Sie den <b>Handscanner</b>, um die Ausweise der Kunden zu scannen.
+            Drücken Sie den Auslöser am Scanner und richten Sie ihn schräg auf
+            den am Ausweis vorhandenen Barcode. Das korrekte Scannen wird durch einen Ton
+            quittiert.
+          </p>
+          <p>Wenn die gescante ID bekannt ist, dann öffnet sich automatisch die Anzeige
+            mit allen Informationen zum Kunden. Prüfen Sie, ob der Kunde zur richtigen Zeit
+            kommt und ob sein Ausweis noch gültig ist (beides wird angezeigt).
+          </p>
+          <p>Klicken Sie dann auf den Button <b>Besuch vermerken</b>. Das System trägt damit
+            den Kunden als Besucher für den aktuellen Tag ein und schließt die Anzeige.</p>
+            <p>
+            Sie kommen dann zu dieser Seite zurück und können den nächsten Ausweis scannen.
+          </p>
+        </div>
+      </article>
+      </main>
+    </div>
+    <script>
+      // Den Kunden laden
+      function ladeKunde() {
+        var idf = document.querySelector('#ip');
+        fetchCall("GET", "SvcKunde", { id: idf.innerHTML, aktiv: true }, function (obj) {
+          if (obj.bean != undefined) {
+            // Kunden anzeigen
+            var session = sessionGet();
+            session.currentID = obj;
+            sessionGoto("DS", session);
+          } else {
+            // ID existiert nicht, Fehler ausgeben
+            idf.innerHTML = "";
+            beanId = undefined;
+            document.getElementById('message').innerHTML = "Der Kunde mit der ID=" + obj.message + " wurde nicht gefunden";
+          }
+        });
+      }
+
+      /*
+       * Es werden alle gedrückten Tasten entgegengenommen. Ausgewertet
+       * werden die Ziffern 0-9, Backspace und Enter.
+       * 
+       * Der Scanner liefert die Zeichen n n n n Enter. Geschickter wäre
+       * es, den Scanner auf ein anderes Endezeichen zu programmieren.
+       * Aber dann kann man nicht einfach einen neuen Scanner aus der
+       * Schachtel nehmen!
+       */
+      window.addEventListener("keypress", function(event) {
+        var idf = document.querySelector('#ip');
+        document.querySelector("#message").innerHTML = "";
+        if (event.key == "Enter") {
+          if (idf.innerHTML == "") return;
+          event.preventDefault();
+          // Abschluss der Eingabe - Kunden suchen
+          ladeKunde();
+          return;
+        }
+        if (event.key == "Backspace") {
+          // Ein Zeichen entfernen, nur für manuelle Eingaben erforderlich
+          if (idf.innerHTML.length > 0) {
+            idf.innerHTML = i.innerHTML.substring(0,idf.innerHTML.length -1);
+          }
+          return;
+        }
+        if ("0123456789".indexOf(event.key) >= 0) {
+          // Es wird eine ID gefolgt von einem Enter eingegeben
+          idf.innerHTML = idf.innerHTML + event.key;
+        }
+      });
+
+      window.onload = function() {
+        sessionBase('SC');
+        makeNavigation(true);
+      }
+    </script>
+  </body>
+</html>

@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kundensuche</title>
+    <link rel="stylesheet" href="./style.css">
+    <script src="javascript.js"></script>
+    <style>
+      img {width: 70%;}
+      p {margin-left: 10px;}
+    </style>
+  </head>
+  <body>
+    <header>Kundenverwaltung</header>
+    <div>
+    <aside><nav><ul></ul></nav></aside>
+    <main>
+    <article>
+      <img></img>
+      <fieldset>
+        <br>
+        Kundendatei: <input id="filename" size="30" />
+        <input type="button" onClick="readfile(this)" value="Einlesen" />
+        <br>
+        <br>
+        <input id="datei" type="button" class="blong" onClick='window.open("/datei", "_blank");' value="Datei anzeigen" title="Zeigt alle Kunden in einer Tabelle"/>
+        &nbsp;
+        <input type="button" id="ausweise" class="blong" onClick='ausweise()' value="Ausweise" title="Ausweise erstellen und drucken"/>
+        <br>
+        <input id='stopserver' type="button" onClick='confirm(this)' class="blong" value="Programm beenden..." title="Beendet den Web-Server"/>
+        <br>
+        <p id="message" style="display:initial;"></p><br>
+        <span id="version" style="float: right;">Version ??</a>
+      </fieldset>
+    </article>
+    </main>
+    </div>
+    <script>
+
+      // Ausweise erstellen öffnen
+      function ausweise() {
+        var session = sessionGet();
+        session.currentID = {};
+        session.searchCrit = "";
+        sessionGoto("AW", session);
+      }
+      
+      function confirm(element) {
+        openYesNo('Wollen Sie das Programm wirklich beenden?', element, function() {
+               fetchCall("POST", "SvcStopServer", {}, function() { showmessage("Der Server wurde beendet."); } );
+             });
+      }
+      
+      // Datei einlesen
+      function readfile(element) {
+        sessionStorage.removeItem("checks");
+        element.disabled=true;
+        element.value='Bitte warten ...';
+        fetchCall("POST", "SvcAdmin", {filename: document.querySelector("#filename").value}, function(obj) {
+            element.disabled=false;
+            element.value="Einlesen";
+            enableOrDisable(obj);
+        });
+      }
+
+      // Wird beim öffnen der Seite ausgeführt
+      window.onload = fetchCall("GET", "SvcAdmin", {} , function(obj) {
+        var sessionExisted = sessionInit(obj.tafel, obj.logo, obj.zusatz);
+        if (obj.ready && !sessionExisted) {
+          sessionGoto('CH');
+        } else {
+          enableOrDisable(obj);
+          document.querySelector("#stopserver").hidden = !obj.showstop;
+          var img = document.querySelector("img");
+          img.src = obj.logo;
+          img.style.margin = "8px";
+          fetchCall("GET", "package", {} , function(obj) {
+            document.querySelector("#version").innerHTML = "Version " + obj.version;
+          });
+        }
+      });
+      
+      function enableOrDisable(obj) {
+        makeNavigation(obj.ready);
+        document.querySelector("#datei").disabled=!obj.ready;
+        document.querySelector("#ausweise").disabled=!obj.ready;
+        document.querySelector("#filename").value = obj.filename;
+        document.querySelector("#message").innerHTML = obj.statusmessage;
+      }
+
+    </script>
+  </body>
+</html>

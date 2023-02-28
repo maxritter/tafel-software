@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hilfe</title>
+    <link rel="stylesheet" href="./style.css">
+  </head>
+  <body>
+    <header>Kundenverwaltung - Hilfe</header>
+<article>
+    <a href='javascript:history.back()' style="float: right;">Zurück</a>
+<h2>Einführung</h2>
+<p>
+Diese Anwendung ist als Web-Anwendung geschrieben.
+Die Oberfläche ist in <b>HTML5</b> und <b>JavaScript</b> geschrieben und läuft in einem Browser
+(Firefox, Chromium, Safari, Microsoft Edge). Der Internet Explorer wird nicht unterstützt.
+Der WebServer ist in <b>JavaScript</b> geschrieben und läuft unter <b>Node.js</b>. Er nutzt das <b>Express
+Framework</b>. Damit ist die Anwendung mehrbenutzerfähig und sie läuft auf unterschiedlichen Platformen.
+</p>
+<p>
+Dieses Programm liest die Daten zu den Kunden aus einer Datei im JSON Format.
+Nach dem Start wird der Dateiname angezeigt und über den Button "Einlesen"
+wird das Lesen gestartet. Nach dem Lesen wird durch den Button "Scannen starten" die
+Seite zum Einstellen der Prüfungen geöffnet. Diese wird automatisch geöffnet,
+wenn das automatische Lesen beim Start konfiguriert ist oder wenn die Datei bereits eingelesen wurde.
+</p>
+
+<h2>Das Scannen von Ausweisen</h2>
+<p>
+  Nach dem Starten des Programmes wird der Browser automatisch geöffnet und es wird
+  die Seite zum Einstellen der Auswahlkriterien/Prüfungen angezeigt. Darunter werden die
+  Kunden angezeigt, die der Auswahl entsprechen und deren Besuch erwartet wird.
+  Durch klicken auf einen Namen werden die Details zum Kunden angezeigt.
+</p>
+<p>
+  Aus dem Dialog mit den Auswahlkriterien kann über den Button <b>Scannen</b>
+  das Scannen der Kunden-Ausweise gestartet werden. 
+  Wenn die gescante <b>ID</b> vorhanden ist, dann werden beim Scannen die Details zum Kunden
+  angezeigt.
+  Unter den Details werden Warnungen angezeigt, z.B. dass der Ausweis des
+  Kunden nicht mehr gültig ist. 
+  Auf der Detailseite wird dann der Besuch des Kunden vermerkt.
+</p>
+<p>
+  Wenn der Kunde noch nicht registriert ist, dann kann er über den Button <b>Neuer Kunde</b>
+  sofort erfasst werden. Nach der Erfassung der Kundendaten wird die Detailseite
+  zum Vermerk des Besuches geöffnet.
+</p>
+
+<h2>Suchen von Kunden</h2>
+<p>
+  Das Suchen erfolgt immer in der aktiven Kunden-Datei. Die inaktive Kunden-Datei
+  enthält die gelöschten Kunden. 
+</p>
+<p>
+  Alternativ kann aus dem Dialog mit den Auswahlkriterien über den Button <b>Suchen</b>
+  die Kundesuche gestartet werden. Ein Kunde kann über die <b>ID</b> oder über
+  den Anfangsbuchstaben seines Namen in der Spalte <b>Name</b> gesucht werden.
+</p>
+<p>
+  Weiterhin können die Kunden angezeigt werden, die die Tafel heute schon besucht haben. Neben den IDs
+  werden Statistik-Informationen angezeigt. Wenn am
+  aktuellen Tag noch keine Besucher registriert wurden, dann werden Statistik-Informationen zum letzten
+  Öffnungstag angezeigt.
+</p>
+<p>
+  Über die Buttons <b>Inaktive Kunden</b> können die gelöschten Kunden bearbeitet werden und
+  über <b>Neuer Kunde</b> kann ein Kunde neu angelegt werden.
+</p>
+
+<h2>Beenden des Programms</h2>
+<p>
+  Am Ende des Tages kann der WebServer über den Button <b>Programm beenden..</b> beendet werden.
+  Alternativ kann das Fenster für den WebServer einfach gschlossen werden.
+</p>
+<p>
+  Beim Beenden des WebServers wird die Statistikdatei geschrieben (siehe unten).
+</p>
+
+<h2>Anzeige von IDs und Namen in Listen</h2>
+<p>
+  Wenn Namen angezeigt werden, dann wird beim Positionieren des Mauszeigers über den Namen die
+  dazugehörige ID angezeigt.
+</p>
+<p>
+  Die Einträge in den Listen sind farbig markiert:
+</p>
+<blockquote>
+  <dl>
+    <dt>rot</dt>
+      <dd>Die Berechtigung ist abgelaufen</dd>
+    <dt>grün</dt>
+      <dd>Der Kunde hat die Tafel heute bereits besucht</dd>
+    <dt>blau</dt>
+      <dd>Kunde ist berechtigt und hat die Tafel heute noch nicht besucht</dd>
+  </dl>
+</blockquote>
+
+<h2>Erfassen eines neuen Kunden</h2>
+<p>
+  Die Felder im ersten Block sind Pflichtfelder, sie sind in jedem Fall zu erfassen.
+  Im leeren Eingabefeld wird vor der Eingabe das erwartete Format angezeigt.
+  Das Format wird allerdings beim Speichern nicht geprüft.
+</p>
+<p>
+  In der Auswahlliste für die Gruppe und die Farbe kann über den
+  Button "Verteilung der Farben ein-/ausblenden" ein Pop-Up geöffnet werden.
+  Dieses Pop-Up zeigt die Anzahl der Kunden pro Gruppe und Farbe an.
+</p>
+<h2>Prüfungen beim Scannen</h2>
+<p>
+Generell wird der Inhalt der Spalte <b>Gültig bis</b> gegen das aktuelle Datum geprüft.
+Es wird eine Warnung angezeigt,
+wenn der Ausweis in den nächsten 3 Wochen abläuft oder aber bereits abgelaufen ist.
+</p>
+<p>
+Die Prüfungen können frei konfiguriert werden (siehe die Konfigurationsdatei <b>config.json</b>).
+</p>
+<h2>Anzeige der Details zu einem Kunden</h2>
+<p>
+Angezeigt werden alle Informationen, die zum Kunden erfasst wurden.
+Weiterhin werden die Resultate der konfigurierten Prüfungen eingeblendet.
+</p>
+Über den Button <b>Besuch vermerken</b> wird das Datum des letzten Besuches
+auf den aktuellen Tag gesetzt und die Detailanzeige wird geschlossen.
+<p>
+Weiterhin kann der Ausweis verlängert werden, die Kundendaten können geändert werden und
+der Ausweis kann gelöscht werden. Gelöschte Ausweise können über den Button <b>Inaktive Kunden</b>
+angezeigt werden. Sie können dort endgültig gelöscht werden oder geändert und damit reaktiviert
+werden.
+</p>
+<p>
+Alle Änderungen werden sofort in die Kunden-Datei geschrieben.
+</p>
+<h2>Ausweise Drucken</h2>
+<p>
+  Zur Auswahl der zu druckenden Ausweise zeigt der Dialog die IDs oder Namen an.
+  Durch Klick auf einen Namen oder eine ID wird jeweils ein Ausweise erstellt und angezeigt.
+  Durch Klick auf den Button "Alle drucken" wird für alle ein Ausweis erstellt und angezeigt.
+</p>
+<p>
+  Per Doppelklick auf den Ausweis kann der Ausweis wieder entfernt werden.
+</p>
+<p>
+  Die Ausweise sind 88 mm breit und 58 mm hoch. Es passen somit 2 mal 4 Ausweise
+  auf ein DIN A4 Blatt. In der Druckvorschau (sofern vorhanden) sind schmale Ränder
+  und eine Skalierung von 100% einzustellen.
+</p>
+<h2>Die Kunden-Datei</h2>
+<p>
+Die Datei enthält die Kundendaten getrennt nach aktiven und inaktiven Kunden.
+Die folgenden Informationen sind immer vorzusehen:</p>
+<blockquote><dl>
+<dt>ID</dt><dd>Eine eindeutige ID. Diese wird zum Scannen benötigt und ist der 
+eindeutige Schlüssel in der Kunden-Datei.</dd>
+<dt>Name</dt><dd>Der Name des Kunden (Nachname gefolgt von den Vornamen)</dd>
+<dt>Adresse</dt><dd>Adresse (Straße, Hausnummer, Postleitzahl und Ort)</dd>
+<dt>Erwachsene</dt><dd>Anzahl der versorgten Erwachsenen</dd>
+<dt>Kinder</dt><dd>Anzahl der versorgten Kinden</dd>
+<dt>A/B</dt><dd>Die zugeteilte Gruppe</dd>
+<dt>Farbe</dt><dd>Die zugeteilte Farbe</dd>
+<dt>Gültig bis</dt><dd>Datum, bis zu dem der Ausweis gültig ist</dd>
+<dt>Letzter Besuch</dt><dd>Datum, an dem der Kunde die Tafel zuletzt besucht hat</dd>
+</dl></blockquote>
+<p>Die folgenden Informationen sind empfohlen technisch aber nicht erforderlich:</p>
+<blockquote><dl>
+<dt>Kind 1 ... 6</dt><dd>Geburtsjahre und Geschlecht der Kinder</dd>
+<dt>Anmerkung</dt><dd>Beliebige Anmerkungen zum Kunden</dd>
+</dl></blockquote>
+<p>Weitere Werte können
+beliebig über die Konfigurationsdatei konfiguriert werden.</p>
+
+<h2>Die Konfigurationsdatei</h2>
+<p>
+Die Konfigurationsdatei hat den Namen <b>config.json</b>. Sie kann mit jedem Editor
+bearbeitet werden. Empfehlenswert ist aber die Verwendung eines JSON-Editors wie
+z.B. https://jsoneditoronline.org/.
+Definiert werden können die folgenden Parameter:
+</p>
+<blockquote><dl>
+  <dt>port:</dt>
+  <dd>Ist der HTTP Port auf dem der Server wartet. Default ist 80, bei anderen Werten
+  ist der Wert in der URL anzugeben (z.B. http://localhost:8080/ statt nur http://localhost/)</dd>
+  <dt>datei:</dt>
+  <dd>Definiert die zu lesende Kunden-Datei</dd>
+  <dt>automatischlesen:</dt>
+  <dd>Die Kunden-Datei wird beim Start automatisch gelesen, wenn dieser
+  Parameter auf <b>true</b> gesetzt wird.
+  </dd>
+  <dt>log:</dt>
+  <dd>Definiert die Datei, in der die Besuche protokolliert werden,
+    und die Spalten die in das Protokoll aufgenommen werden.</dd>
+  <dt>stop:</dt>
+  <dd>Wenn auf <b>show</b> gesetzt, dann ist der Stop der Anwendung von der Startseite möglich.</dd>
+  <dt>dateiHeader:</dt>
+  <dd>Definiert die Spaltenüberschriften für die Ansicht "Datei".
+    Wenn nicht angegeben, dann werden die Namen der Spalten verwendet.
+  </dd>
+  <dt>spalten:</dt>
+  <dd>Definiert die Feldnamen und ihre Position in der Kundendatei.</dd>
+  <dt>sortieren:</dt>
+  <dd>Definiert Felder, die beim Speichern sortiert werden sollen. Anzugeben ist der Anfang
+  der zu sortierenden Feldnamen (z.B. "Kind&nbsp;" damit die Spalten Kind&nbsp;1 bis Kind&nbsp;6 sortiert werden).
+  Dabei werden leere Felder nach unten sortiert.</dd>
+  <dt>check:</dt>
+  <dd>Definiert die Prüfungen, die beim Scannen durchgeführt werden sollen.
+  Zu definieren sind die Namen der Spalten und die möglichen Werte.</dd>
+  <dt>werte:</dt>
+  <dd>Definiert die Namen von Spalten und die möglichen Werte.</dd>
+  <dt>neukunde:</dt>
+  <dd>Definiert die Werte, mit denen die Felder in der Erfassung
+  vorbelegt werden sollen.</dd>
+
+  <dt>id:</dt>
+  <dd>Definiert den Aufbau der ID, die bei der Neuerfassung eines Kunden vom System vorgeschlagen wird.
+  </dd>
+  <dd>Der Default für den Aufbau der ID ist jjmmtt nn 0. Dabei ist jjmmtt das Tagesdatum, nn ist eine laufende Nummer
+      von 01 bis 99 für den Tag und 0 ist die Unternummer. Diese kann z.B. manuell hochgezählt werden,
+      wenn für den Kunden ein neuer Ausweis gedruckt werden muss.</dd>
+
+  <dt>tafel:</dt>
+  <dd>Namen der Tafel für die Ausweise. Die Zeilen sind durch \n zu trennen.</dd>
+
+  <dt>kuerzel:</dt>
+  <dd>Definiert den Kurznamen der Tafel für die Jahresstatistik.
+      Wenn dieser Werte nicht definiert ist, dann wird keine Jahresstatistik erstellt.</dd>
+
+  <dt>logo:</dt>
+  <dd>Name der Bilddatei mit dem Logo der Tafel (ca. 1000x300 Bildpunkte).</dd>
+  <dt>color:</dt>
+  <dd>Definiert für jede Farbe den Namen im HTML/CSS (z.B. "blau": "blue").
+  Diese Definition legt die beim Ausweisdruck verwendeten Farben fest.</dd>
+  <dt>CSVSeparator:</dt>
+  <dd>Definiert den Trenner für CSV-Dateien.
+  Üblich sind Komma (,) Semikolon (;) oder Tab (\n).</dd>
+</dl></blockquote>
+
+<h2>Die Statistikdatei</h2>
+<p>
+Die Statistikdaten werden beim Beenden des Servers in eine Datei mit dem Namen
+<blockquote><dl><dt>jjjj-mm-dd-statistik.csv</dt></dl></blockquote>
+geschrieben. Dabei ist jjjj-mm-dd das Datum des letzten Öffnungstages.
+Sie enthalten eine Zeile mit folgenden Werten:
+</p>
+<blockquote><dl>
+  <dt>Datum im Format jjjj-mm-dd</dt>
+  <dt>Anzahl der berechtigten Kunden</dt>
+  <dt>Anzahl der berechtigten Erwachsenen</dt>
+  <dt>Anzahl der berechtigten Kinder</dt>
+  <dt>Anzahl der Besucher am Öffnungstag</dt>
+  <dt>Anzahl der versorgten Erwachsenen</dt>
+  <dt>Anzahl der versorgten Kinder</dt>
+</dl></blockquote>
+<p>
+  Die Statistikdateien werden zur Erstellung der Jahresstatistik herangezogen.
+</p>
+
+<h2>Die Jahresstatistik</h2>
+<p>
+  Beim Beenden liest der Server alle vorhandenen Statistikdateien vom aktuellen Jahr
+  und fasst die Werte in einer Excelliste zusammen. Die Datei hat den Namen
+  <blockquote><dl><dt>jjjj-summen.xlsx</dt></dl></blockquote>
+  Sie wird nur dann erstellt, wenn der Konfigurationsparameter <b>kuerzel</b>
+  in der Konfigurationsdatei definiert wurde.
+</p>
+<a href='javascript:history.back()' style="float: right;">Zurück</a><br>
+</article>
+  </body>
+</html>

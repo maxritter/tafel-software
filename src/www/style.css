@@ -1,0 +1,169 @@
+header {background-color:#FE9A2E;
+	border-radius:5px;
+	color: #ffffff;
+	font-size: xx-large;
+	font-style:italic;
+	font-weight:bolder;
+	padding: 8px;
+	text-align:center;
+	margin:8px;
+	height: 44px;}
+
+.atoday {color: green;
+	font-weight: bold;}
+.atoday:visited {color: green;}
+
+.aexpired {color: brown;}
+.aexpired:visited {color: brown;}
+
+article {border: 1px solid grey;
+	border-radius:5px;
+	margin:8px;
+	padding-bottom:15px;
+	padding-left:10px;
+	padding-right:10px;
+	padding-top:15px;}
+
+.fs	{border: 1px solid grey;
+	border-radius:5px;
+	padding-bottom:15px;
+	padding-left:10px;
+	padding-right:10px;
+	padding-top:15px;}
+
+.lfs a {width: 245px;}
+.fieldset br { display: none; }
+
+fieldset {border: 0;
+	padding: 0ch}
+fieldset a {float:left;
+  padding-right:5pt;
+	text-decoration: none;}
+fieldset a:visited {color: blue;}
+
+body	{max-width: 1000px;
+	margin: auto;}
+
+table	{font-family: arial, sans-serif;
+	border-collapse: collapse;
+	width: 100%;
+	background-color:#F7F2E0;}
+
+td	{border: 1px solid #dddddd;
+	text-align: left;
+	padding: 4pt;
+	font-size: medium;}
+
+input	{ font-size: medium;}
+input[type=button] { margin-bottom: 4px;}
+select { font-size: medium;}
+legend { font-size: medium;}
+p { font-size: medium;}
+span { font-size: medium;}
+
+.c0	{width: 20%;}
+
+.c1	{width: 70%;}
+
+dd	{padding-bottom: 10px;}
+
+.blong	{width: 120pt;}
+
+.bplus	{width: 80pt;}
+.bmid	{width: 60pt;}
+
+.btn	{text-align: center;
+	padding: 1px 0px;}
+
+.bch	{width: 20pt;}
+
+.inp-txt {width: 98%;}
+.inp-txt-hl {width: 48%;}
+.inp-txt-hr {width: 49%; margin-left: 1%;}
+.inp-txt-plz {width: 9%; margin-left: 1%;}
+.inp-txt-ort {width: 38%; margin-left: 1%;}
+
+/* Popup container - can be anything you want */
+.popup {
+  position: relative;
+  display: inline-block;
+  cursor: pointer;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+/* The actual popup */
+.popup .popuptext {
+  visibility: hidden;
+  background-color: #555;
+  color: #eee;
+  width: max-content;
+	padding: 4px ;
+	border-radius: 4px;
+  position: absolute;
+  z-index: 1;
+  top: 50%;
+  left: 90%;
+  margin-left: -80px;
+}
+
+/* Toggle this class - hide and show the popup */
+.popup .show {
+  visibility: visible;
+	-webkit-animation: fadeIn 1s;
+	animation: fadeIn 1s
+}
+
+/* Add animation (fade in the popup) */
+@-webkit-keyframes fadeIn {
+  from {opacity: 0;} 
+  to {opacity: 1;}
+}
+
+@keyframes fadeIn {
+  from {opacity: 0;}
+  to {opacity:1 ;}
+}
+
+.popuptable {
+  background-color:#555;
+}
+
+aside {float:left;
+	text-align:center;
+	width:18%;}
+
+main {background-color:#ffffff;
+		color: #000000;
+		float:left;
+		width:82%;}
+		
+nav {margin:2px;
+	padding-bottom:20px;
+	padding-left:5px;
+	padding-right:5px;
+	padding-top:4px;
+	text-align:center;}
+
+ul {margin:0; 
+	padding:0;
+	width:100%;
+	list-style-type:none;
+	font-size:large;
+}
+	
+ul li a {text-decoration:none;
+	color:#ffffff; 
+	padding:10.5px 0 11px 0;
+	margin-bottom:10px;
+	background-color:#FE9A2E;
+	display:block;
+	border-radius:10px;
+}
+ul li a:visited {color:#ffffff;}
+ul li a:hover, ul li .current {color:black;
+  background-color:#ffdfbd;
+}
+		

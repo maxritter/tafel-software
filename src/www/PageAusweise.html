@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,user-scalable=no">
+    <title>Ausweise erstellen</title>
+    <link rel="stylesheet" href="./style.css">
+    <link rel="stylesheet" href="./print.css">
+    <script src="javascript.js"></script>
+    <script src="makelinks.js"></script>
+    <script src="print.js"></script>
+    <script src="JsBarcode.code128.min.js"></script>
+    <script src="print.js"></script>
+    <style>
+      body	{max-width: 100%; }
+    </style>
+  </head>
+  <body>
+    <header>Ausweise erstellen</header>
+    <article>
+      <input type="button" id="end" onClick='goBack()' value="Beenden" style="float: right;" class="bmid" />
+      <select onchange="addLinks(this.value)">
+        <option value="changed">Geänderte</option>
+        <option value="ID">Über die ID</option>
+        <option value="name">Über Namen</option>
+      </select>
+      <input type="button" class="bplus" onClick='location.reload()' value="Zurücksetzen" title="Seite neu laden"/> 
+      <input id="bprint" type="button" class="bplus" onClick='window.print()' disabled value="Drucken..." title="Ausdruck starten"/>
+      <br>
+      <br>
+      <fieldset id="fs1" class="fs"></fieldset>
+    </article>
+    <div id="line" style="width: 88mm; position: fixed;z-index: 99;"><hr style="margin:0;"></div>
+  <script>
+    'use strict'
+    var color;
+
+    // zurück zur aufrufenden Seite
+    function goBack() {
+      var session = sessionGet();
+      session.currentID = undefined;
+      session.searchCrit = '';
+      sessionBack(session);
+    }
+
+    // Einen Ausweis erstellen
+    function macheAusweis(kunde) {
+      var session = sessionGet();
+
+      var div = document.createElement("div");
+      var body = document.querySelector("body");
+      body.appendChild(div);
+      
+      div.addEventListener("dblclick", function() {
+         body.removeChild(this);
+         }, true);
+
+      div.classList.add("d1");
+      div.innerHTML = getPrintHTML(session.tafel, session.logo, session.zusatz, kunde);
+
+      var id = kunde[0];
+      JsBarcode('#ID' + id, id, {
+        width: 2.1,
+        height: 38, margin:8,
+        fontSize: 16,
+        displayValue: true
+      });
+    }
+
+    // Den Kunden laden und den Ausweis erstellen
+    function loadKunde(link, a) {
+      fetchCall("GET", "SvcKunde", {id: link.key, aktiv: link.aktiv}, function(obj) {
+        if (obj.bean == undefined)
+          showerror("Die ID " + obj.message + " ist nicht definiert!");
+        else {
+          var c = color[obj.bean[6]];
+          obj.bean[6] = c == undefined ? "white" : c;
+          macheAusweis(obj.bean);
+          document.querySelector('#bprint').disabled = false;
+        }
+      });
+    }
+
+    function addLinks(type) {
+      fetchCall("GET", "SvcSearch", { type: type }, function(links) {
+        var fs = document.querySelector("#fs1");
+        if (type == "name") {
+          fs.classList.add("lfs");
+          fs.classList.add("fieldset");
+        } else {
+          fs.classList.remove("lfs");
+          fs.classList.remove("fieldset");
+        }
+        createLinks(fs, "Ausweise erstellen:", links, loadKunde);
+        if (type == "changed" && fs.childNodes.length > 1) {
+          addButtonDelete(fs);
+          var sp = document.createElement("span");
+          sp.innerHTML = "&nbsp;";
+          sp.style.cssFloat = "right";
+          fs.appendChild(sp);
+        }
+        addButtonAlle(fs);
+      });
+    }
+
+    // Die Liste mit den geänderten Kunden löschen
+    function addButtonDelete(fs) {
+      var ip = document.createElement("input");
+      fs.appendChild(ip);
+      ip.type = "button";
+      ip.value = "Liste löschen";
+      ip.style.cssFloat = "right";
+      ip.addEventListener('click', function() {
+          var txt = "Wollen Sie die Liste mit den geänderten Kunden wirklich löschen?"
+          openYesNo(txt, fs, function() {
+            fetchCall("POST", "SvcChanged", [], function() {
+              addLinks("changed");
+          });
+        });
+      });
+    }
+
+    // Für alle Kunden einen Ausweis erstellen
+    function addButtonAlle(fs) {
+      var ip = document.createElement("input");
+      fs.appendChild(ip);
+      ip.type = "button";
+      ip.value = "Alle drucken";
+      ip.style.cssFloat = "right";
+      ip.addEventListener('click', function() {
+        // Für alle links den click ausführen
+        var as = document.querySelectorAll("A");
+        for (var i = 0; i < as.length; i++)
+          as[i].dispatchEvent(new Event("click"))
+      });
+    }
+
+    window.onload = function() {
+      sessionVerify("AW");
+      fetchCall("GET", "SvcAdmin", {} , function(obj) {
+          color = obj.color;
+          addLinks("changed");
+      });
+    }
+
+  </script>
+  </body>
+</html>
