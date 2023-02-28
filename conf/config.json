@@ -1,11 +1,12 @@
 {
   "port": 8080,
-  "datei": "tafelmaisach.json",
+  "datei": "conf/tafelmaisach.json",
+  "logo": "ffb.jpg",
   "automatischlesen": true,
   "stop": "show",
   "check":
     {
-      "A/B": [ "A" ],
+      "A/B/C": [ "A" ],
       "Farbe": ["gelb", "rot", "grün", "blau", "neutral" ]
     },
   "werte":
@@ -22,7 +23,7 @@
       "Adresse": 1,
       "Erwachsene": 2,
       "Kinder": 3,
-      "A/B": 4,
+      "A/B/C": 4,
       "Farbe": 5,
       "Gültig bis": 6,
       "Letzter Besuch": 7,

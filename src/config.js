@@ -179,7 +179,7 @@ exports.doCheck = function(kunde) {
 
 exports.readPackage = function() {
   try {
-    let data = fs.readFileSync("tafeljs/package.json");
+    let data = fs.readFileSync("package.json");
     return JSON.parse(data);
   } catch (err) {
     console.error(err);

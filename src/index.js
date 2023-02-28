@@ -15,7 +15,7 @@ const express = require('express')      // WebServer Zusatzmodule
 const app = express()
 
 // Lesen der Konfiguration
-let configDatei = 'config.json';
+let configDatei = 'conf/config.json';
 if (process.argv.length > 2) configDatei = process.argv[2];
 console.log(`Die Konfigurationsdatei ${process.cwd()}/${configDatei} wird gelesen...`);
 config.readConfig(configDatei);
