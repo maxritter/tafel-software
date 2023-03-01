@@ -1,7 +1,15 @@
 {
   "port": 8080,
   "datei": "conf/tafelmaisach.json",
-  "logo": "ffb.jpg",
+  "logo": "olching.jpg",
+  "tafel": "Maisach",
+  "color": {
+    "blau": "blue",
+    "rot": "red",
+    "grün": "green",
+    "gelb": "yellow",
+    "neutral": "gray"
+  },
   "automatischlesen": true,
   "stop": "show",
   "check": {

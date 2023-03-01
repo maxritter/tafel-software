@@ -1,25 +1,23 @@
 {
- "inaktiv": {},
- "aktiv": {
-  "190312001": [
-   "Mustermann, Margit Josephine",
-   "Musterstrasse 38, 99999 Musterstadt",
-   "1",
-   "1",
-   "B",
-   "gelb",
-   "2019-12-12",
-   "2023-02-28",
-   "2003w",
-   "",
-   "",
-   "",
-   "",
-   "",
-   "Mustereintrag - nur für Testzwecke - sollte wieder gelöscht werden"
-  ]
- },
- "changed": [
-  "190312001"
- ]
+    "inaktiv": {},
+    "aktiv": {
+        "190312001": [
+            "Mustermann, Margit Josephine",
+            "Musterstrasse 38, 99999 Musterstadt",
+            "1",
+            "1",
+            "B",
+            "gelb",
+            "2019-12-12",
+            "2023-02-28",
+            "2003w",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "Mustereintrag - nur für Testzwecke - sollte wieder gelöscht werden"
+        ]
+    },
+    "changed": []
 }

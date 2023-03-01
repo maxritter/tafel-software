@@ -19,6 +19,8 @@ function getPrintHTML(tafel, image, zusatz, kunde) {
   }
   html += '<span class="fontl">' + s1 + '</span><br>' + 
             '<span class="fontm">' + s2 + '<br>';
+  
+  // Die Adresse wird aktuell nicht mitgedruckt
   /* s1 = kunde[2];
   if (typeof s1 != 'string') s1 = "-";
   s2 = '-';
@@ -28,6 +30,7 @@ function getPrintHTML(tafel, image, zusatz, kunde) {
     s1 = s1.substring(0, ix);
   }
   html += s1 + '<br>' + s2 + '</span>'; */
+
   html += '</div>';
   html += '<svg id="ID' + kunde[0] + '"></svg>' +
           '<div class="d31">';
