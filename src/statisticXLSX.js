@@ -84,7 +84,7 @@ function addTitel(sheet, tafel, year) {
 // Überschriften einfügen
 function addHeader(sheet, f7tag) {
   sheet.addRow(["Woche", 
-     "Bezugsberechtigte Ausweise", "Bezugsberechtigte Erwachsene", "Bezugsberechtigte Kinder",
+     "Ausgegebene Ausweise", "Bezugsberechtigte Erwachsene", "Bezugsberechtigte Kinder",
      "Bezugsberechtigte Personen Gesamt",
      "",
      "Abholer", "Versorgte Erwachsene", "Versorgte Kinder",

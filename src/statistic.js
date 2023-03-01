@@ -32,7 +32,7 @@ exports.readStatistics = function(path, year) {
 	});
   if (table.length == 0) return null;
 
-  // Die Anzahl der Abholer wird als Mittelwert ermittelt
+  // Die Anzahl der Bezugsberechtigten wird als Mittelwert ermittelt
   for (let i = 0; i < table.length; i++) {
     result = table[i];
     if (result[0] == 0) continue;
@@ -46,7 +46,7 @@ exports.readStatistics = function(path, year) {
   for (let i = 0; i < table.length; i++) {
     result = table[i];
     if (result[0] != 0) {
-      result[0] = i + 1;  // Anzahl Tage mit Woche überschreiben
+      result[0] = toISOweek(year,i + 1);  // Anzahl Tage mit Woche nach ISO überschreiben
     }
   }
   return table;
@@ -56,7 +56,31 @@ function newRow() {
   return [0, 0, 0, 0, 0, 0, 0];
 }
 
+// Liefert die Woche im Jahr
+// Der 1. Januar liegt in Woche 1
 function getWeek(date) {
-  let onejan = new Date(date.getFullYear(), 0, 1);
-  return Math.ceil( (((date - onejan) / 86400000) + onejan.getDay() + 1) / 7 );
+  let januar_1 = new Date(date.getFullYear() + "-01-01");
+  let dayInYear = (date - januar_1) / 86400000;
+  let dayInWeek = [6,0,1,2,3,4,5][januar_1.getDay()];
+  return parseInt((dayInYear + dayInWeek) / 7) + 1;
+}
+
+// Rechnet die Woche im Jahr auf die Woche nach ISO 8601 um
+// Die erste Woche kann 1, 52 oder 53 sein
+function toISOweek(year, week) {
+  let date = new Date(year + "-01-01");
+  if (date.getDay() > 0 && date.getDay() < 5)
+    return week; // 1. Januar ist Mo, Di, Mi, Do 
+  if (week == 1) {
+    if (date.getDay() == 5)
+      return 53;
+    if (date.getDay() == 6) {
+      let py = parseInt(year) - 1; // Vorjahr
+      let pyd = new Date(py + "-01-01");
+      if (pyd.getDay() == 4)
+        return 53;
+    }
+    return 52;
+  }
+  return week - 1;
 }
