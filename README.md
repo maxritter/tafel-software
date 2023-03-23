@@ -17,6 +17,8 @@ Anschließend kann das Programm wie folgt gestartet werden, und ist anschließen
 npm run start
 ```
 
+Der Start ist weiterhin über die Datei `start.bat` möglich. Hierbei wird das Programm gestartet und direkt der Browser geöffnet. Zum einfachen Start kann von dieser Datei eine Verknüpfung auf den Desktop angelegt werden.
+
 Das Programm liest die Daten zu den Kunden aus einer Datei im JSON Format. Nach dem Start wird der Dateiname angezeigt und über den Button "Einlesen" wird das Lesen gestartet. Nach dem Lesen wird durch den Button "Scannen starten" die Seite zum Einstellen der Prüfungen geöffnet. Diese wird automatisch geöffnet, wenn das automatische Lesen beim Start konfiguriert ist oder wenn die Datei bereits eingelesen wurde.
 
 Eine vollständige Bedienungsanleitung findet sich unter `docs/Bedienungsanleitung.pdf`.
