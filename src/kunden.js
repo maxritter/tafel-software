@@ -335,7 +335,7 @@ exports.setVisited = function(id, log, SEP) {
   besucheHeute[id] = true;
   if (log.file == undefined || log.file == "") return;
   try {
-    let data = '"' + new Date().toLocaleString() + '"';
+    let data = '"' + new Date().toLocaleString('de-DE') + '"';
     let value;
     log.columns.forEach(column => {
       if (column == "ID") value = id;

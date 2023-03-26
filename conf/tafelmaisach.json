@@ -1,24 +1,63 @@
 {
-    "inaktiv": {},
-    "aktiv": {
-        "190312001": [
-            "Mustermann, Margit Josephine",
-            "Musterstrasse 38, 99999 Musterstadt",
-            "1",
-            "1",
-            "B",
-            "gelb",
-            "2019-12-12",
-            "2023-03-02",
-            "2003w",
-            "",
-            "",
-            "",
-            "",
-            "",
-            "Mustereintrag - nur für Testzwecke - sollte wieder gelöscht werden",
-            "GS"
-        ]
-    },
-    "changed": []
+ "inaktiv": {},
+ "aktiv": {
+  "190312001": [
+   "Mustermann, Margit Josephine",
+   "Musterstrasse 38, 99999 Musterstadt",
+   "1",
+   "1",
+   "B",
+   "gelb",
+   "2019-12-12",
+   "2023-03-26",
+   "2003w",
+   "",
+   "",
+   "",
+   "",
+   "",
+   "Mustereintrag - nur für Testzwecke - sollte wieder gelöscht werden",
+   "GS"
+  ],
+  "230326010": [
+   "TEST, TEST",
+   "sdd, 3434 dfdf",
+   "1",
+   "0",
+   "B",
+   "gelb",
+   "2023-12-12",
+   "2023-03-26",
+   "",
+   "",
+   "",
+   "",
+   "",
+   "",
+   "",
+   "SGB II"
+  ],
+  "230326020": [
+   "adsfsdf, dsfdsf",
+   "sdfsdf, 234 sdfsdf",
+   "1",
+   "0",
+   "B",
+   "gelb",
+   "2023-12-12",
+   "2023-03-26",
+   "",
+   "",
+   "",
+   "",
+   "",
+   "",
+   "",
+   "SGB II"
+  ]
+ },
+ "changed": [
+  "230326010",
+  "230326020"
+ ]
 }

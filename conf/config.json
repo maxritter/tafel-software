@@ -116,13 +116,11 @@
     ""
   ],
   "log": {
-    "file": "Besuche.csv",
+    "file": "stats/stats.csv",
     "columns": [
-      "ID",
       2,
       3,
-      5,
-      6
+      4
     ]
   }
 }
