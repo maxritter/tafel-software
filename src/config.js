@@ -177,6 +177,10 @@ exports.doCheck = function(kunde) {
   return result;
 }
 
+exports.getGroups = function () {
+  return config.check['A/B/C'];
+}
+
 exports.readPackage = function() {
   try {
     let data = fs.readFileSync("package.json");

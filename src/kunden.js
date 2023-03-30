@@ -6,6 +6,7 @@
 
 const fs = require('fs'); // Dateizugriffe
 const os = require('os');
+const config = require('./config.js'); // Konfiguration
 
 var kundenDB = null; // Die Datenbank enthält alle Daten
 var besucheHeute = {}; // Die Besucher heute
@@ -13,7 +14,13 @@ var besucheHeuteDate = today();
 var spaltenNamen, spaltenIndex;
 
 // Spalten
-var ColGueltig, ColBesuch, ColName, ColErwachsene, ColKinder, ColAB, ColFarbe;
+var ColGueltig,
+  ColBesuch,
+  ColName,
+  ColErwachsene,
+  ColKinder,
+  ColGroup,
+  ColFarbe;
 
 setInterval(() => {
   if (besucheHeuteDate == today()) return;
@@ -51,7 +58,7 @@ exports.readDatenbank = function (dateiname, spaltenNamenUndIndex) {
   ColName = spaltenIndex[0];
   ColErwachsene = spaltenIndex[2];
   ColKinder = spaltenIndex[3];
-  ColAB = spaltenIndex[4];
+  ColGroup = spaltenIndex[4];
   ColFarbe = spaltenIndex[5];
   ColGueltig = spaltenIndex[6];
   ColBesuch = spaltenIndex[7];
@@ -186,7 +193,7 @@ exports.getKundeNeu = function (kunde, cnf) {
   let ab = {};
   Object.keys(kundenDB.aktiv).forEach((id) => {
     let kunde = kundenDB.aktiv[id];
-    let v = kunde[ColAB];
+    let v = kunde[ColGroup];
     let f = kunde[ColFarbe];
     if (typeof v == 'string' && typeof f == 'string') {
       let key = v + ' ' + f;
@@ -304,7 +311,7 @@ function determineChanges(idNew, idOld, kundeNew) {
     kundeNew[ColName] == kundeOld[ColName] &&
     kundeNew[ColErwachsene] == kundeOld[ColErwachsene] &&
     kundeNew[ColKinder] == kundeOld[ColKinder] &&
-    kundeNew[ColAB] == kundeOld[ColAB] &&
+    kundeNew[ColGroup] == kundeOld[ColGroup] &&
     kundeNew[ColFarbe] == kundeOld[ColFarbe]
   ) {
     // sind gleich
@@ -342,12 +349,19 @@ exports.delete = function (id) {
 // Setzt das Datum für den letzten Besuch auf heute
 exports.setVisited = function (id, log, SEP) {
   let kunde = kundenDB.aktiv[id];
-  if (kunde == undefined) return { message: 'Unbekannte ID: ' + id };
+  if (kunde == undefined) return { message: `Unbekannte ID: ${id}` };
   kunde[ColBesuch] = today();
   besucheHeute[id] = true;
   if (log.file == undefined || log.file == '') return;
   try {
-    let data = '"' + new Date().toLocaleString('de-DE') + '"';
+    const d = new Date();
+    let data = `"${d.getFullYear()}-${d.getMonth() + 1}-${d.getDate()} ${d
+      .getHours()
+      .toString()
+      .padStart(2, '0')}:${d.getMinutes().toString().padStart(2, '0')}:${d
+      .getSeconds()
+      .toString()
+      .padStart(2, '0')}"`;
     let value;
     log.columns.forEach((column) => {
       if (column == 'ID') value = id;
@@ -358,7 +372,7 @@ exports.setVisited = function (id, log, SEP) {
       else {
         value = value.replace(/"/g, '""');
         value = value.replace(/\n/g, '\\n');
-        data += SEP + '"' + value + '"';
+        data += `${SEP}"${value}"`;
       }
     });
     data += os.EOL;
@@ -514,53 +528,32 @@ function prepareValues(id, inarray) {
 // Liefert die Statistik für den letzten Öffnungstag
 exports.statistik = function (schreibeFile, SEP) {
   let ids = Object.keys(kundenDB.aktiv);
-  let datum = '0000-00-00';
-  let besucher = 0,
-    besucherE = 0,
-    besucherK = 0,
-    erwachsene = 0,
-    kinder = 0;
-  ids.forEach((id) => {
-    let kunde = kundenDB.aktiv[id];
-    let letzterbesuch = kunde[ColBesuch];
-    let e = parseInt(kunde[ColErwachsene]);
-    if (isNaN(e)) e = 1;
-    erwachsene += e;
-    let k = parseInt(kunde[ColKinder]);
-    if (isNaN(k)) k = 0;
-    kinder += k;
-    if (letzterbesuch == datum) {
-      besucher++;
-      besucherE += e;
-      besucherK += k;
-    } else if (letzterbesuch > datum) {
-      if (isDateFormat(letzterbesuch)) {
-        besucher = 1;
-        datum = letzterbesuch;
-        besucherE = e;
-        besucherK = k;
-      }
-    }
-  });
+
+  const mostRecentVisit = getMostRecentVisit(ids);
+
+  const {
+    berechtigtGesamt,
+    berechtigtErwachsen,
+    berechtigtKind,
+    besucherGesamt,
+    besucherErwachsen,
+    besucherKind,
+  } = calculateStatistics(ids, mostRecentVisit);
+
   if (schreibeFile === true) {
-    let csv =
-      '"' +
-      datum +
-      '"' +
-      SEP +
-      ids.length +
-      SEP +
-      erwachsene +
-      SEP +
-      kinder +
-      SEP +
-      besucher +
-      SEP +
-      besucherE +
-      SEP +
-      besucherK +
-      os.EOL;
-    let fn = datum + '-statistik.csv';
+    writeAirtableCsv(ids, mostRecentVisit);
+
+    let csv = [
+      `"${mostRecentVisit}"`,
+      berechtigtGesamt,
+      berechtigtErwachsen,
+      berechtigtKind,
+      besucherGesamt,
+      besucherErwachsen,
+      besucherKind,
+    ].join(SEP);
+
+    let fn = `${mostRecentVisit}-statistik.csv`;
     try {
       fs.writeFileSync(fn, csv);
     } catch (err) {
@@ -570,15 +563,168 @@ exports.statistik = function (schreibeFile, SEP) {
     return null;
   }
   return {
-    datum: datum,
+    datum: mostRecentVisit,
     berechtigte: ids.length,
-    erwachsene: erwachsene,
-    kinder: kinder,
-    besucher: besucher,
-    besucherE: besucherE,
-    besucherK: besucherK,
+    erwachsene: erwachseneBerechtigt,
+    kinder: kinderBerechtigt,
+    besucher: gesamtBesucher,
+    besucherE: erwachseneBesucher,
+    besucherK: kinderBesucher,
   };
 };
+
+// Letzter Besuch von allen aktiven Kunden
+function getMostRecentVisit(ids) {
+  const allVisits = ids.map((id) => kundenDB.aktiv[id][ColBesuch]);
+  const mostRecentVisit = allVisits.sort().reverse()[0];
+
+  if (!isDateFormat(mostRecentVisit)) {
+    console.error(
+      'Kann letzten Besuch von allen aktiven Kunden nicht bestimmen'
+    );
+  }
+
+  return mostRecentVisit;
+}
+
+function calculateStatistics(ids, mostRecentVisit) {
+  let besucherGesamt = 0,
+    besucherErwachsen = 0,
+    besucherKind = 0,
+    berechtigtErwachsen = 0,
+    berechtigtKind = 0;
+
+  ids.forEach((id) => {
+    let kunde = kundenDB.aktiv[id];
+    let letzterbesuch = kunde[ColBesuch];
+    let proKundeErwachsen = parseInt(kunde[ColErwachsene]);
+
+    if (isNaN(proKundeErwachsen)) proKundeErwachsen = 1;
+    berechtigtErwachsen += proKundeErwachsen;
+
+    let proKundeKind = parseInt(kunde[ColKinder]);
+
+    if (isNaN(proKundeKind)) proKundeKind = 0;
+
+    berechtigtKind += proKundeKind;
+
+    if (letzterbesuch === mostRecentVisit) {
+      besucherGesamt++;
+      besucherErwachsen += proKundeErwachsen;
+      besucherKind += proKundeKind;
+    }
+  });
+
+  return {
+    berechtigtGesamt: ids.length,
+    berechtigtErwachsen,
+    berechtigtKind,
+    besucherGesamt,
+    besucherErwachsen,
+    besucherKind,
+  };
+}
+
+function writeAirtableCsv(ids, mostRecentVisit) {
+  const airtableCsvFilename = './stats/stats_airtable.csv';
+
+  let airtableCsvExists = null;
+
+  try {
+    airtableCsvExists = fs.existsSync(airtableCsvFilename);
+  } catch (err) {
+    console.log('Fehler beim Überprüfen der airtable CSV Datei');
+    console.error(err);
+  }
+
+  if (airtableCsvExists === false) {
+    try {
+      createAirtableCSV(airtableCsvFilename);
+    } catch (err) {
+      console.log('Fehler beim Erstellen der airtable CSV Datei');
+      console.error(err);
+    }
+  }
+
+  if (airtableCsvExists === true) {
+    try {
+      removeEntriesForMostRecentVisit(airtableCsvFilename, mostRecentVisit);
+    } catch (error) {
+      console.log(
+        'Fehler beim Festellen oder Entfernen von Duplikaten in der airtable CSV Datei'
+      );
+      console.error(err);
+    }
+
+    const airtableCsvContent = createAirtableCsvContent(ids, mostRecentVisit);
+    try {
+      fs.appendFileSync(airtableCsvFilename, airtableCsvContent);
+    } catch (error) {
+      console.log('Fehler beim Erweitern der airtable CSV Datei');
+      console.log(error);
+    }
+  }
+}
+
+// To avoid duplicate entries, this function removes entries for the most recent visit, if those have been written already.
+function removeEntriesForMostRecentVisit(filename, mostRecentVisit) {
+  const fileContents = fs.readFileSync(filename, 'utf8');
+  const lines = fileContents.split('\n');
+
+  // Start at index one because we don't need to check the header
+  for (let i = 1; i < lines.length; i++) {
+    if (lines[i].startsWith(`"${mostRecentVisit}"`)) {
+      lines.splice(i, 1);
+      // Decrease iterator to account for deleted line
+      i--;
+    }
+  }
+
+  const modifiedFileContents = lines.join('\n');
+  fs.writeFileSync(filename, modifiedFileContents);
+}
+
+function createAirtableCSV(filename) {
+  fs.writeFileSync(
+    filename,
+    'datum,berechtigtGesamt,berechtigtErwachsen,berechtigtKind,besucherGesamt,besucherErwachsen,besucherKind,gruppe'
+  );
+}
+
+function createAirtableCsvContent(ids, mostRecentVisit) {
+  const groups = config.getGroups();
+  let airtableCsvRows = [];
+
+  groups.forEach((group) => {
+    const idsPerGroup = ids.filter(
+      (id) => kundenDB.aktiv[id][ColGroup] === group
+    );
+
+    const {
+      berechtigtGesamt,
+      berechtigtErwachsen,
+      berechtigtKind,
+      besucherGesamt,
+      besucherErwachsen,
+      besucherKind,
+    } = calculateStatistics(idsPerGroup, mostRecentVisit);
+
+    airtableCsvRows.push(
+      [
+        `"${mostRecentVisit}"`,
+        berechtigtGesamt,
+        berechtigtErwachsen,
+        berechtigtKind,
+        besucherGesamt,
+        besucherErwachsen,
+        besucherKind,
+        group,
+      ].join(',')
+    );
+  });
+
+  return `\n${airtableCsvRows.join('\n')}`;
+}
 
 function isDateFormat(datestring) {
   return datestring == datestring.match(/[0-9]{4}-[0-9]{2}-[0-9]{2}/);
