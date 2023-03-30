@@ -687,7 +687,7 @@ function removeEntriesForMostRecentVisit(filename, mostRecentVisit) {
 function createAirtableCSV(filename) {
   fs.writeFileSync(
     filename,
-    'datum,berechtigtGesamt,berechtigtErwachsen,berechtigtKind,besucherGesamt,besucherErwachsen,besucherKind,gruppe'
+    'Datum,Berechtigte Gesamt,Berechtigte Erwachsene,Berechtigte Kinder, Besucher Gesamt,Besucher Erwachsene,Besucher Kinder,Gruppe'
   );
 }
 
