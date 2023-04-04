@@ -640,6 +640,7 @@ function writeAirtableCsv(ids, mostRecentVisit) {
   if (airtableCsvExists === false) {
     try {
       createAirtableCSV(airtableCsvFilename);
+      airtableCsvExists = true;
     } catch (err) {
       console.log('Fehler beim Erstellen der airtable CSV Datei');
       console.error(err);
