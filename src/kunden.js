@@ -565,11 +565,11 @@ exports.statistik = function (schreibeFile, SEP) {
   return {
     datum: mostRecentVisit,
     berechtigte: ids.length,
-    erwachsene: erwachseneBerechtigt,
-    kinder: kinderBerechtigt,
-    besucher: gesamtBesucher,
-    besucherE: erwachseneBesucher,
-    besucherK: kinderBesucher,
+    erwachsene: berechtigtErwachsen,
+    kinder: berechtigtKind,
+    besucher: besucherGesamt,
+    besucherE: besucherErwachsen,
+    besucherK: besucherKind,
   };
 };
 
