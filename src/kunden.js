@@ -543,29 +543,11 @@ exports.statistik = function (schreibeFile, SEP) {
 
   if (schreibeFile === true) {
     writeAirtableCsv(ids, mostRecentVisit, SEP);
-
-    let csv = [
-      `"${mostRecentVisit}"`,
-      berechtigtGesamt,
-      berechtigtErwachsen,
-      berechtigtKind,
-      besucherGesamt,
-      besucherErwachsen,
-      besucherKind,
-    ].join(SEP);
-
-    let fn = `${mostRecentVisit}-statistik.csv`;
-    try {
-      fs.writeFileSync(fn, csv);
-    } catch (err) {
-      console.error(err);
-      console.log('Fehler beim Schreiben der Statistikdatei ' + fn);
-    }
     return null;
   }
   return {
     datum: mostRecentVisit,
-    berechtigte: ids.length,
+    berechtigte: berechtigtGesamt,
     erwachsene: berechtigtErwachsen,
     kinder: berechtigtKind,
     besucher: besucherGesamt,
