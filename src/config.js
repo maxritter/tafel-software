@@ -210,3 +210,5 @@ exports.readConfig = function(filename) {
     process.exit();
   }      
 }
+
+exports.getStatisticsFolder = () => './statistiken'

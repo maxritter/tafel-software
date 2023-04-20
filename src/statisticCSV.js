@@ -79,3 +79,16 @@ exports.statisticCSV = function(SEP) {
   schreibeSumme(".", year, SEP);
 }
 
+exports.createStatisticsFolder = (folderPath) => {
+  try {
+    if (!fs.existsSync(folderPath)) {
+      fs.mkdirSync(folderPath);
+      console.log(`Der Ordner '${folderPath}' wurde erstellt.`);
+    } else {
+      console.log(`Der Ordner '${folderPath}' wurde gefunden.`);
+    }
+  } catch (err) {
+    console.error(`Error: ${err.message}`);
+  }
+}
+

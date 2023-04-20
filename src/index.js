@@ -7,6 +7,7 @@
 const kunden = require('./kunden.js');  // Kunden-Datenbank
 const config = require('./config.js');  // Konfiguration
 const datei = require('./datei.js');  // Konfiguration
+const statisticCSV = require('./statisticCSV.js') // Statistik
 
 const http = require('http')            // WebServer
 const express = require('express')      // WebServer Zusatzmodule
@@ -20,6 +21,8 @@ if (process.argv.length > 2) configDatei = process.argv[2];
 console.log(`Die Konfigurationsdatei ${process.cwd()}/${configDatei} wird gelesen...`);
 config.readConfig(configDatei);
 console.log("...abgeschlossen");
+
+statisticCSV.createStatisticsFolder(config.getStatisticsFolder())
 
 // Statement zum Anzeigen der HTML-Seiten, der Scripts und des Stylesheets.
 // Dies enthält alle Funktionen des WebServers zum Anzeigen von WebSeiten.

@@ -7,6 +7,7 @@
 const fs = require('fs'); // Dateizugriffe
 const os = require('os');
 const config = require('./config.js'); // Konfiguration
+const statisticCSV = require('./statisticCSV.js') // Statistik
 
 var kundenDB = null; // Die Datenbank enthält alle Daten
 var besucheHeute = {}; // Die Besucher heute
@@ -626,7 +627,7 @@ function calculateStatistics(ids, mostRecentVisit) {
 }
 
 function writeAirtableCsv(ids, mostRecentVisit, SEP) {
-  const airtableCsvFilename = `./statistiken/${mostRecentVisit}-statistik.csv`;
+  const airtableCsvFilename = `${config.getStatisticsFolder()}/${mostRecentVisit}-statistik.csv`;
 
   try {
     createAirtableCSV(airtableCsvFilename, SEP);
