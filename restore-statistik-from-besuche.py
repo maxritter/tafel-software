@@ -125,8 +125,7 @@ def main():
         if check_semicolon_num(file):
             corrupted_files['seperator_num'].append(file)
         
-
-    print(corrupted_files)
+    print(json.dumps(corrupted_files, indent=4))
 
 
     # Fix separator and date format
