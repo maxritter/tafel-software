@@ -1,4 +1,6 @@
 node_modules
-merge
+__pycache__
+.pytest_cache
+test_out
 *.csv
 *.xlsx
