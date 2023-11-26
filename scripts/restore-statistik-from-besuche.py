@@ -99,6 +99,11 @@ def process_file(date, people):
     
     return berechtigt_gesamt, berechtigt_erwachsen, berechtigt_kind
 
+def check_if_csv_file_exists(file_path):
+    if os.path.exists(file_path):
+        return True
+    else:
+        return False
 
 # create a main function
 def main():
@@ -137,8 +142,43 @@ def main():
 
     print(f'Fixed {len(corrupted_files["separator_semicolon"]) + len(corrupted_files["separator_tab"])} files with wrong separator and date format\n=====================')
 
+    # Check for missing ...-statistic.csv files
+    date_start = datetime.strptime('2023-01-01', '%Y-%m-%d')
+    date_end = datetime.strptime('2023-12-31', '%Y-%m-%d')
+
+    dates_without_csv_file = []
+
+    with open('Besuche.csv', 'r') as f:
+        next(f)  # Skip the first line (header)
+        for line in f:
+
+            parts = line.replace('"', '').split(',')
+
+            format = ''
+    
+            if is_date_string_valid(parts[0], '%Y-%m-%d %H:%M:%S'):
+                sub_parts = parts[0].split(' ')
+                line_date = datetime.strptime(sub_parts[0], "%Y-%m-%d")
+                format = '%Y-%m-%d %H:%M:%S'
+            elif is_date_string_valid(parts[0], "%d.%m.%Y"):
+                line_date = datetime.strptime(parts[0], "%d.%m.%Y")
+                format = '%d.%m.%Y'
+            else:
+                continue
+
+            if check_date_in_range(line_date, date_start, date_end):
+                file_path = f'{line_date.strftime("%Y-%m-%d")}-statistik.csv'
+                date_has_csv_file = check_if_csv_file_exists(file_path)
+                # print(date_has_csv_file)
+
+                if not date_has_csv_file and file_path not in dates_without_csv_file:
+                    dates_without_csv_file.append(file_path)
+
+    print(dates_without_csv_file)
+
+
     # Check existing files match reconstruction method
-    for file in files:
+    for file in files + dates_without_csv_file:
         # if file in corrupted_files['seperator_num'] or file in corrupted_files['nul_character']:
         #     continue
 
@@ -193,23 +233,42 @@ def main():
                     # besucher_gesamt += line_besucher_erwachsen + line_besucher_kind
                     besucher_gesamt += 1
 
+        # Since those values can't be reconstructed use values from faulty ...-statistik.csv as lower bound
+        if not file in dates_without_csv_file:
+            with open(file, 'r') as f:
+                csv_content_original = f.read()
+                csv_parts = csv_content_original.strip().split(',')
+                if len(csv_parts) >= 4:
+                    if int(csv_parts[1]) > 0:
+                        berechtigt_gesamt += int(csv_parts[1])
+                    if int(csv_parts[2]) > 0:
+                        berechtigt_erwachsen += int(csv_parts[2])
+                    if int(csv_parts[3]) > 0:
+                        berechtigt_kind += int(csv_parts[3])
+        
         csv_content_reconstructed = f'"{date.strftime("%Y-%m-%d")}",{berechtigt_gesamt},{berechtigt_erwachsen},{berechtigt_kind},{besucher_gesamt},{besucher_erwachsen},{besucher_kind}'
-
-        with open(file, 'r') as f:
-            csv_content_original = f.read()
 
 
         is_equal = not file in corrupted_files['seperator_num'] and not file in corrupted_files['nul_character'] and compare_reconstructable_numbers(csv_content_original, csv_content_reconstructed)
         is_success = check_reconstruction_success(csv_content_reconstructed)
 
-        print(file, '✅' if is_equal else '❌', '✅' if is_success else  '❌')
-        print('orgiginal\t', '\t'.join(csv_content_original.strip().split(',')))
+        if not file in dates_without_csv_file:
+            print(file, '✅' if is_equal else '❌', '✅' if is_success else  '❌')
+            print('orgiginal\t', '\t'.join(csv_content_original.strip().split(',')))
+        else:
+            print(file, 'did not exist. was created now. ⭐')
+
         print('reconstructed\t', '\t'.join(csv_content_reconstructed.strip().split(',')))
 
         # Replace where reconstruction was a success
-        if not is_equal and is_success:
+        if not file in dates_without_csv_file:
+            if not is_equal and is_success:
+                with open(file, 'w') as f:
+                    f.write(csv_content_reconstructed)
+        else:
             with open(file, 'w') as f:
                 f.write(csv_content_reconstructed)
+
 
 if __name__ == "__main__":
     main()
