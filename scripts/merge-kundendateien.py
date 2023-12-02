@@ -56,14 +56,17 @@ def deduplicate_entries(df, field):
         # Get the first entry which will have the newest 'last' date
         newest_entry = sorted_group.iloc[0]
 
+        # If there are any entries with the 'inaktiv' status and the same 'last' date as the newest entry, prefer those
+        if newest_entry["status"] == "inaktiv":
+            preferred_entry = newest_entry
         # If there are any entries with the 'changed' attribute and the same 'last' date as the newest entry, prefer those
-        if newest_entry["last"] in sorted_group[sorted_group["changed"]]["last"].values:
+        elif newest_entry["last"] in sorted_group[sorted_group["changed"]]["last"].values:
             preferred_entry = sorted_group[sorted_group["changed"]].iloc[0]
         else:
             preferred_entry = newest_entry
 
-        # Check if all attributes are the same, then return the first entry without warning
-        if group.drop(columns=["last", "changed"]).nunique(dropna=False).max() == 1:
+        # Check if all attributes are the same except 'status', then return the first entry without warning
+        if group.drop(columns=["last", "status", "changed"]).nunique(dropna=False).max() == 1:
             return group.iloc[0]
 
         return preferred_entry
