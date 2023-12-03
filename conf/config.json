@@ -116,7 +116,7 @@
     ""
   ],
   "log": {
-    "file": "stats/stats.csv",
+    "file": "statistiken/stats.csv",
     "columns": [
       2,
       3,

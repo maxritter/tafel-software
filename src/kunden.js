@@ -7,6 +7,7 @@
 const fs = require('fs'); // Dateizugriffe
 const os = require('os');
 const config = require('./config.js'); // Konfiguration
+const statisticCSV = require('./statisticCSV.js') // Statistik
 
 var kundenDB = null; // Die Datenbank enthält alle Daten
 var besucheHeute = {}; // Die Besucher heute
@@ -541,35 +542,17 @@ exports.statistik = function (schreibeFile, SEP) {
   } = calculateStatistics(ids, mostRecentVisit);
 
   if (schreibeFile === true) {
-    writeAirtableCsv(ids, mostRecentVisit);
-
-    let csv = [
-      `"${mostRecentVisit}"`,
-      berechtigtGesamt,
-      berechtigtErwachsen,
-      berechtigtKind,
-      besucherGesamt,
-      besucherErwachsen,
-      besucherKind,
-    ].join(SEP);
-
-    let fn = `${mostRecentVisit}-statistik.csv`;
-    try {
-      fs.writeFileSync(fn, csv);
-    } catch (err) {
-      console.error(err);
-      console.log('Fehler beim Schreiben der Statistikdatei ' + fn);
-    }
+    writeAirtableCsv(ids, mostRecentVisit, SEP);
     return null;
   }
   return {
     datum: mostRecentVisit,
-    berechtigte: ids.length,
-    erwachsene: erwachseneBerechtigt,
-    kinder: kinderBerechtigt,
-    besucher: gesamtBesucher,
-    besucherE: erwachseneBesucher,
-    besucherK: kinderBesucher,
+    berechtigte: berechtigtGesamt,
+    erwachsene: berechtigtErwachsen,
+    kinder: berechtigtKind,
+    besucher: besucherGesamt,
+    besucherE: besucherErwachsen,
+    besucherK: besucherKind,
   };
 };
 
@@ -625,73 +608,41 @@ function calculateStatistics(ids, mostRecentVisit) {
   };
 }
 
-function writeAirtableCsv(ids, mostRecentVisit) {
-  const airtableCsvFilename = './stats/stats_airtable.csv';
-
-  let airtableCsvExists = null;
+function writeAirtableCsv(ids, mostRecentVisit, SEP) {
+  const airtableCsvFilename = `${config.getStatisticsFolder()}/${mostRecentVisit}-statistik.csv`;
 
   try {
-    airtableCsvExists = fs.existsSync(airtableCsvFilename);
+    createAirtableCSV(airtableCsvFilename, SEP);
+    const airtableCsvContent = createAirtableCsvContent(
+      ids,
+      mostRecentVisit,
+      SEP
+    );
+    fs.appendFileSync(airtableCsvFilename, airtableCsvContent);
   } catch (err) {
-    console.log('Fehler beim Überprüfen der airtable CSV Datei');
+    console.log('Fehler beim Erstellen der airtable CSV Datei');
     console.error(err);
   }
-
-  if (airtableCsvExists === false) {
-    try {
-      createAirtableCSV(airtableCsvFilename);
-    } catch (err) {
-      console.log('Fehler beim Erstellen der airtable CSV Datei');
-      console.error(err);
-    }
-  }
-
-  if (airtableCsvExists === true) {
-    try {
-      removeEntriesForMostRecentVisit(airtableCsvFilename, mostRecentVisit);
-    } catch (error) {
-      console.log(
-        'Fehler beim Festellen oder Entfernen von Duplikaten in der airtable CSV Datei'
-      );
-      console.error(err);
-    }
-
-    const airtableCsvContent = createAirtableCsvContent(ids, mostRecentVisit);
-    try {
-      fs.appendFileSync(airtableCsvFilename, airtableCsvContent);
-    } catch (error) {
-      console.log('Fehler beim Erweitern der airtable CSV Datei');
-      console.log(error);
-    }
-  }
 }
 
-// To avoid duplicate entries, this function removes entries for the most recent visit, if those have been written already.
-function removeEntriesForMostRecentVisit(filename, mostRecentVisit) {
-  const fileContents = fs.readFileSync(filename, 'utf8');
-  const lines = fileContents.split('\n');
-
-  // Start at index one because we don't need to check the header
-  for (let i = 1; i < lines.length; i++) {
-    if (lines[i].startsWith(`"${mostRecentVisit}"`)) {
-      lines.splice(i, 1);
-      // Decrease iterator to account for deleted line
-      i--;
-    }
-  }
-
-  const modifiedFileContents = lines.join('\n');
-  fs.writeFileSync(filename, modifiedFileContents);
-}
-
-function createAirtableCSV(filename) {
+function createAirtableCSV(filename, SEP) {
   fs.writeFileSync(
     filename,
-    'Datum,Berechtigte Gesamt,Berechtigte Erwachsene,Berechtigte Kinder, Besucher Gesamt,Besucher Erwachsene,Besucher Kinder,Gruppe'
+    [
+      'Datum',
+      'Berechtigte Gesamt',
+      'Berechtigte Erwachsene',
+      'Berechtigte Kinder',
+      'Besucher Gesamt',
+      'Versorgte Erwachsene',
+      'Versorgte Kinder',
+      'Versorgte Gesamt',
+      'Gruppe',
+    ].join(SEP)
   );
 }
 
-function createAirtableCsvContent(ids, mostRecentVisit) {
+function createAirtableCsvContent(ids, mostRecentVisit, SEP) {
   const groups = config.getGroups();
   let airtableCsvRows = [];
 
@@ -718,8 +669,9 @@ function createAirtableCsvContent(ids, mostRecentVisit) {
         besucherGesamt,
         besucherErwachsen,
         besucherKind,
+        besucherErwachsen + besucherKind,
         group,
-      ].join(',')
+      ].join(SEP)
     );
   });
 
