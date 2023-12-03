@@ -565,11 +565,11 @@ exports.statistik = function (schreibeFile, SEP) {
   return {
     datum: mostRecentVisit,
     berechtigte: ids.length,
-    erwachsene: erwachseneBerechtigt,
-    kinder: kinderBerechtigt,
-    besucher: gesamtBesucher,
-    besucherE: erwachseneBesucher,
-    besucherK: kinderBesucher,
+    erwachsene: berechtigtErwachsen,
+    kinder: berechtigtKind,
+    besucher: besucherGesamt,
+    besucherE: besucherErwachsen,
+    besucherK: besucherKind,
   };
 };
 
@@ -640,6 +640,7 @@ function writeAirtableCsv(ids, mostRecentVisit) {
   if (airtableCsvExists === false) {
     try {
       createAirtableCSV(airtableCsvFilename);
+      airtableCsvExists = true;
     } catch (err) {
       console.log('Fehler beim Erstellen der airtable CSV Datei');
       console.error(err);
